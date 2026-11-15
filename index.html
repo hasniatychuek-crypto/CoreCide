@@ -1,0 +1,972 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VOLTEX BUG - UI Simulation</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts: Orbitron & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Orbitron:wght@600;700;800;900&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        :root {
+            --bg-dark: #070b14;
+            --primary-blue: #1565c0;
+            --card-active-blue: #2b74cc;
+            --input-dark: #0c1322;
+            --neon-green: #00c853;
+        }
+
+        body {
+            background-color: #050810;
+            color: #ffffff;
+            font-family: 'Orbitron', sans-serif;
+            margin: 0;
+            padding: 0;
+            overflow-x: hidden;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .font-mono-tech {
+            font-family: 'JetBrains Mono', monospace;
+        }
+
+        .font-display {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* STRICT SCREEN VISIBILITY CONTROL (ANTI-OVERRIDE) */
+        .hidden-screen {
+            display: none !important;
+        }
+
+        /* Custom Scrollbar Hide for Carousel */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        /* Glow effects */
+        .banner-text-glow {
+            text-shadow: 0 0 18px rgba(255, 255, 255, 0.7), 0 4px 12px rgba(0, 0, 0, 0.9);
+        }
+
+        .header-pill-glow {
+            box-shadow: 0 4px 20px rgba(21, 101, 192, 0.5);
+        }
+
+        /* Smooth carousel snap */
+        .carousel-track {
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+        }
+
+        .carousel-slide {
+            scroll-snap-align: start;
+        }
+
+        /* Pulse animation for online dot */
+        @keyframes pulse-dot {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.45; transform: scale(0.85); }
+        }
+        .animate-dot {
+            animation: pulse-dot 2s infinite ease-in-out;
+        }
+
+        /* Twinkling Stars Animation */
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.85; }
+            50% { opacity: 0.25; }
+        }
+
+        /* Starry Night Background (#070b14 to #0d1629) */
+        .star-bg {
+            background: linear-gradient(180deg, #070b14 0%, #0d1629 100%);
+            position: relative;
+        }
+        .star-layer {
+            background-image:
+                radial-gradient(1.5px 1.5px at 22px 38px, rgba(255,255,255,0.9), transparent),
+                radial-gradient(1px 1px at 64px 92px, rgba(255,255,255,0.65), transparent),
+                radial-gradient(2px 2px at 140px 48px, rgba(186,230,253,0.85), transparent),
+                radial-gradient(1.5px 1.5px at 210px 135px, rgba(255,255,255,0.75), transparent),
+                radial-gradient(1px 1px at 295px 65px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(2px 2px at 360px 160px, rgba(147,197,253,0.75), transparent),
+                radial-gradient(1px 1px at 95px 220px, rgba(255,255,255,0.55), transparent),
+                radial-gradient(1.5px 1.5px at 315px 270px, rgba(255,255,255,0.65), transparent);
+            background-size: 400px 320px;
+            animation: twinkle 4s infinite ease-in-out;
+        }
+
+        /* Toast animation */
+        @keyframes slideUpFade {
+            from { opacity: 0; transform: translate(-50%, 20px); }
+            to { opacity: 1; transform: translate(-50%, 0); }
+        }
+        .toast-enter {
+            animation: slideUpFade 0.28s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+    </style>
+</head>
+<body class="min-h-screen flex justify-center bg-[#04070d]">
+
+    <!-- Mobile-First Main App Shell (Max-width 430px centered) -->
+    <div class="w-full max-w-[430px] min-h-screen bg-[#070b14] relative overflow-x-hidden shadow-2xl border-x border-white/[0.06]">
+
+        <!-- ========================================================= -->
+        <!-- SCREEN 1: LANDING SCREEN (#landing-screen) - DEFAULT FLEX -->
+        <!-- ========================================================= -->
+        <section id="landing-screen" style="display: flex;" class="star-bg min-h-screen flex-col justify-between px-5 pt-7 pb-6 relative overflow-hidden">
+
+            <!-- Twinkling Stars Overlay (pointer-events-none so clicks always pass through) -->
+            <div class="star-layer absolute inset-0 pointer-events-none"></div>
+
+            <!-- Translucent Pirate Ship & Ocean Waves Silhouette at Bottom -->
+            <svg class="absolute inset-x-0 bottom-0 w-full h-[390px] pointer-events-none opacity-25 select-none" viewBox="0 0 430 390" preserveAspectRatio="xMidYMax slice">
+                <defs>
+                    <linearGradient id="shipGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#93c5fd" stop-opacity="0.55"/>
+                        <stop offset="100%" stop-color="#0f172a" stop-opacity="0.1"/>
+                    </linearGradient>
+                    <linearGradient id="seaGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#1e3a8a" stop-opacity="0.45"/>
+                        <stop offset="100%" stop-color="#070b14" stop-opacity="0.95"/>
+                    </linearGradient>
+                </defs>
+                <!-- Masts & Rigging -->
+                <line x1="215" y1="35" x2="215" y2="265" stroke="#93c5fd" stroke-width="4" opacity="0.5"/>
+                <line x1="138" y1="78" x2="138" y2="265" stroke="#93c5fd" stroke-width="3" opacity="0.4"/>
+                <line x1="295" y1="88" x2="295" y2="265" stroke="#93c5fd" stroke-width="3" opacity="0.4"/>
+                <!-- Main Pirate Sails -->
+                <path d="M150,62 Q215,48 280,62 Q265,125 282,175 Q215,160 148,175 Q165,125 150,62 Z" fill="url(#shipGrad)"/>
+                <path d="M92,102 Q138,92 178,102 Q168,150 180,192 Q138,182 90,192 Q102,150 92,102 Z" fill="url(#shipGrad)"/>
+                <path d="M255,108 Q295,98 342,108 Q332,155 344,195 Q295,185 253,195 Q265,155 255,108 Z" fill="url(#shipGrad)"/>
+                <!-- Ship Hull -->
+                <path d="M68,242 L362,242 L332,298 L102,298 Z" fill="url(#shipGrad)"/>
+                <path d="M52,232 Q80,252 110,242 L325,242 Q358,252 382,226 L362,258 L72,258 Z" fill="#bfdbfe" opacity="0.35"/>
+                <!-- Rolling Dark Ocean Waves -->
+                <path d="M0,292 Q108,268 215,292 T430,292 L430,390 L0,390 Z" fill="url(#seaGrad)"/>
+                <path d="M0,322 Q120,302 240,324 T430,318 L430,390 L0,390 Z" fill="#070b14" opacity="0.85"/>
+            </svg>
+
+            <!-- Top & Center Interactive Content Stack -->
+            <div class="relative z-20 flex flex-col items-center">
+                <!-- Circular Pirate Emblem Logo (VOLTEX) -->
+                <div class="w-[126px] h-[126px] rounded-full p-[3px] bg-gradient-to-b from-[#EAB308] via-[#38BDF8] to-[#EAB308] shadow-[0_0_32px_rgba(29,78,216,0.55)] mb-4">
+                    <div class="w-full h-full rounded-full bg-[#091326] flex items-center justify-center relative overflow-hidden border border-white/15">
+                        <svg viewBox="0 0 140 140" class="w-full h-full">
+                            <defs>
+                                <radialGradient id="emblemBg" cx="50%" cy="45%" r="55%">
+                                    <stop offset="0%" stop-color="#1d4ed8"/>
+                                    <stop offset="70%" stop-color="#0f295c"/>
+                                    <stop offset="100%" stop-color="#071126"/>
+                                </radialGradient>
+                                <linearGradient id="voltexTextGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                                    <stop offset="0%" stop-color="#ffffff"/>
+                                    <stop offset="52%" stop-color="#7dd3fc"/>
+                                    <stop offset="100%" stop-color="#1d4ed8"/>
+                                </linearGradient>
+                            </defs>
+                            <circle cx="70" cy="70" r="66" fill="url(#emblemBg)"/>
+                            <circle cx="70" cy="70" r="61" fill="none" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="6 4" opacity="0.5"/>
+
+                            <!-- Crossed Bones -->
+                            <g stroke="#f8fafc" stroke-width="5.5" stroke-linecap="round">
+                                <line x1="34" y1="34" x2="106" y2="102"/>
+                                <line x1="106" y1="34" x2="34" y2="102"/>
+                            </g>
+                            <circle cx="32" cy="32" r="4.5" fill="#f8fafc"/>
+                            <circle cx="36" cy="29" r="4" fill="#f8fafc"/>
+                            <circle cx="108" cy="32" r="4.5" fill="#f8fafc"/>
+                            <circle cx="104" cy="29" r="4" fill="#f8fafc"/>
+                            <circle cx="32" cy="104" r="4.5" fill="#f8fafc"/>
+                            <circle cx="108" cy="104" r="4.5" fill="#f8fafc"/>
+
+                            <!-- Straw Hat Pirate Skull -->
+                            <circle cx="70" cy="45" r="14" fill="#ffffff"/>
+                            <rect x="62" y="54" width="16" height="8" rx="3" fill="#ffffff"/>
+                            <circle cx="65" cy="45" r="3.2" fill="#0f172a"/>
+                            <circle cx="75" cy="45" r="3.2" fill="#0f172a"/>
+                            <polygon points="70,48 68,52 72,52" fill="#0f172a"/>
+                            <!-- Straw Hat -->
+                            <path d="M55,36 Q70,20 85,36 Z" fill="#facc15" stroke="#ca8a04" stroke-width="1"/>
+                            <rect x="55" y="33" width="30" height="3.2" fill="#dc2626"/>
+                            <ellipse cx="70" cy="36.5" rx="23" ry="4.2" fill="#eab308" stroke="#a16207" stroke-width="1"/>
+
+                            <!-- Nautical Anchor -->
+                            <g transform="translate(70, 106)" stroke="#e2e8f0" stroke-width="3.2" fill="none" stroke-linecap="round">
+                                <line x1="0" y1="-14" x2="0" y2="14"/>
+                                <line x1="-8" y1="-7" x2="8" y2="-7"/>
+                                <path d="M-14,5 Q0,18 14,5"/>
+                                <circle cx="0" cy="-16" r="2.8" fill="#eab308" stroke="none"/>
+                            </g>
+
+                            <!-- Bold Stylized VOLTEX Banner -->
+                            <rect x="10" y="60" width="120" height="25" rx="6" fill="#070d1a" opacity="0.88" stroke="#38bdf8" stroke-width="1.2"/>
+                            <text x="70" y="78" text-anchor="middle" font-family="Orbitron, sans-serif" font-weight="900" font-size="18.5" letter-spacing="1.5" fill="url(#voltexTextGrad)">
+                                VOLTEX
+                            </text>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Large Glowing Title: VOLTEX -->
+                <h1 class="font-display font-extrabold text-[32px] tracking-[0.26em] text-white banner-text-glow pl-[0.26em] uppercase">
+                    VOLTEX
+                </h1>
+
+                <!-- Golden-Yellow Divider Bar -->
+                <div class="w-24 h-[3px] rounded-full bg-gradient-to-r from-[#EAB308] via-[#FACC15] to-[#38BDF8] my-3 shadow-[0_0_10px_rgba(234,179,8,0.65)]"></div>
+
+                <!-- Monospace Subtitle -->
+                <p class="font-mono-tech text-[12px] text-[#CBD5E1] tracking-wide text-center">
+                    APK Terbaru dengan fitur lengkap
+                </p>
+
+                <!-- 3 Feature Cards Grid -->
+                <div class="grid grid-cols-3 gap-2.5 w-full mt-6">
+                    <!-- TERMUX -->
+                    <div class="bg-[#0f172a]/75 backdrop-blur-md border border-white/[0.12] rounded-2xl p-3 flex flex-col items-center text-center shadow-lg">
+                        <div class="w-8 h-8 rounded-xl bg-[#38BDF8]/15 flex items-center justify-center mb-2 text-[#38BDF8]">
+                            <i data-lucide="smartphone" class="w-4 h-4"></i>
+                        </div>
+                        <span class="font-display font-bold text-[10px] tracking-[0.1em] text-white uppercase">
+                            TERMUX
+                        </span>
+                        <span class="font-mono-tech text-[9px] leading-tight text-slate-300 mt-1">
+                            Install di HP langsung
+                        </span>
+                    </div>
+
+                    <!-- VPS -->
+                    <div class="bg-[#0f172a]/75 backdrop-blur-md border border-white/[0.12] rounded-2xl p-3 flex flex-col items-center text-center shadow-lg">
+                        <div class="w-8 h-8 rounded-xl bg-[#38BDF8]/15 flex items-center justify-center mb-2 text-[#38BDF8]">
+                            <i data-lucide="server" class="w-4 h-4"></i>
+                        </div>
+                        <span class="font-display font-bold text-[10px] tracking-[0.1em] text-white uppercase">
+                            VPS
+                        </span>
+                        <span class="font-mono-tech text-[9px] leading-tight text-slate-300 mt-1">
+                            Server 24/7 stabil
+                        </span>
+                    </div>
+
+                    <!-- UBOT -->
+                    <div class="bg-[#0f172a]/75 backdrop-blur-md border border-white/[0.12] rounded-2xl p-3 flex flex-col items-center text-center shadow-lg">
+                        <div class="w-8 h-8 rounded-xl bg-[#38BDF8]/15 flex items-center justify-center mb-2 text-[#38BDF8]">
+                            <i data-lucide="bot" class="w-4 h-4"></i>
+                        </div>
+                        <span class="font-display font-bold text-[10px] tracking-[0.1em] text-white uppercase">
+                            UBOT
+                        </span>
+                        <span class="font-mono-tech text-[9px] leading-tight text-slate-300 mt-1">
+                            Bot per user
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Action Buttons Stack -->
+                <div class="w-full flex flex-col gap-3.5 mt-6 relative z-30">
+                    <!-- 1. PRIMARY MASUK BUTTON (Dual-bound via onclick + addEventListener) -->
+                    <button id="btn-masuk" type="button" onclick="enterDashboard()"
+                        class="relative z-30 w-full py-4 px-5 rounded-[16px] bg-gradient-to-r from-[#1565c0] to-[#1d4ed8] hover:from-[#1976d2] hover:to-[#2563eb] active:scale-[0.98] text-white font-display font-bold text-[14px] tracking-[0.18em] uppercase shadow-[0_8px_24px_rgba(21,101,192,0.5)] flex items-center justify-center gap-3 transition-all cursor-pointer select-none">
+                        <i data-lucide="log-in" class="w-5 h-5 pointer-events-none"></i>
+                        <span class="pointer-events-none">MASUK</span>
+                    </button>
+
+                    <!-- 2. YELLOW BELI AKSES BUTTON -->
+                    <button id="btn-beli-akses" type="button"
+                        class="w-full py-3.5 px-5 rounded-[16px] bg-[#D4A017] hover:bg-[#eab308] active:scale-[0.98] text-white font-display font-bold text-[13px] tracking-[0.16em] uppercase shadow-[0_6px_20px_rgba(212,160,23,0.35)] flex items-center justify-center gap-3 transition-all cursor-pointer">
+                        <i data-lucide="shopping-cart" class="w-5 h-5 pointer-events-none"></i>
+                        <span class="pointer-events-none">BELI AKSES</span>
+                    </button>
+
+                    <!-- 3. TRANSPARENT BORDERED HUBUNGI SUPPORT BUTTON -->
+                    <button id="btn-hubungi-support" type="button"
+                        class="w-full py-3.5 px-5 rounded-[16px] bg-[#0f172a]/65 hover:bg-[#1e293b]/80 backdrop-blur-md border border-white/25 active:scale-[0.98] text-slate-100 font-display font-semibold text-[12px] tracking-[0.14em] uppercase flex items-center justify-center gap-3 transition-all cursor-pointer">
+                        <i data-lucide="headphones" class="w-4 h-4 text-slate-300 pointer-events-none"></i>
+                        <span class="pointer-events-none">HUBUNGI SUPPORT</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Footer Social Card -->
+            <footer class="relative z-20 mt-6 bg-[#0f172a]/75 backdrop-blur-md border border-white/[0.12] rounded-[22px] py-4 px-5 shadow-xl">
+                <div class="grid grid-cols-3 gap-2">
+                    <!-- Developer (Telegram Blue) -->
+                    <button type="button" data-social="Developer (@VoltexDev)"
+                        class="social-btn flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition">
+                        <div class="w-12 h-12 rounded-full bg-[#1d4ed8]/25 border border-[#38bdf8]/45 flex items-center justify-center text-[#38bdf8] group-hover:bg-[#1d4ed8]/40 transition">
+                            <i data-lucide="send" class="w-5 h-5"></i>
+                        </div>
+                        <span class="font-mono-tech text-[11px] text-slate-300 group-hover:text-white">Developer</span>
+                    </button>
+
+                    <!-- Channel (Telegram Yellow) -->
+                    <button type="button" data-social="Channel Official (t.me/voltexinfo)"
+                        class="social-btn flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition">
+                        <div class="w-12 h-12 rounded-full bg-[#eab308]/20 border border-[#eab308]/45 flex items-center justify-center text-[#facc15] group-hover:bg-[#eab308]/35 transition">
+                            <i data-lucide="send" class="w-5 h-5"></i>
+                        </div>
+                        <span class="font-mono-tech text-[11px] text-slate-300 group-hover:text-white">Channel</span>
+                    </button>
+
+                    <!-- WhatsApp (Green) -->
+                    <button type="button" data-social="WhatsApp Admin (+62 812-VOLTEX)"
+                        class="social-btn flex flex-col items-center gap-2 group cursor-pointer active:scale-95 transition">
+                        <div class="w-12 h-12 rounded-full bg-[#00c853]/20 border border-[#00c853]/45 flex items-center justify-center text-[#00e676] group-hover:bg-[#00c853]/35 transition">
+                            <i data-lucide="phone" class="w-5 h-5"></i>
+                        </div>
+                        <span class="font-mono-tech text-[11px] text-slate-300 group-hover:text-white">WhatsApp</span>
+                    </button>
+                </div>
+            </footer>
+        </section>
+
+        <!-- ========================================================= -->
+        <!-- SCREEN 2: DASHBOARD PEMILIHAN BUG (#dashboard-screen)     -->
+        <!-- ========================================================= -->
+        <section id="dashboard-screen" class="hidden-screen min-h-screen bg-[#070b14] flex-col pb-8">
+
+            <!-- Sticky Dark Top Header -->
+            <header class="flex items-center justify-between px-4 py-4 sticky top-0 z-30 bg-[#070b14]/90 backdrop-blur-md border-b border-white/[0.05]">
+                <!-- Back Button (<) -> Returns to #landing-screen -->
+                <button id="btn-back" type="button" onclick="returnToLanding()" aria-label="Kembali"
+                    class="w-11 h-11 rounded-full bg-[#121826] border border-white/[0.1] flex items-center justify-center text-gray-200 hover:bg-[#1e2638] active:scale-95 transition cursor-pointer">
+                    <i data-lucide="chevron-left" class="w-5 h-5 pointer-events-none"></i>
+                </button>
+
+                <!-- Center Blue Pill: VOLTEX BUG -->
+                <div class="bg-[#1565c0] header-pill-glow px-5 py-2.5 rounded-full flex items-center gap-3 select-none">
+                    <span class="w-5 h-5 rounded-full border-[5px] border-white bg-[#1565c0] inline-block shrink-0"></span>
+                    <span class="font-display font-bold text-[13px] tracking-[0.16em] text-white uppercase">
+                        VOLTEX BUG
+                    </span>
+                </div>
+
+                <!-- Refresh Button (↻) -->
+                <button id="btn-refresh" type="button" aria-label="Refresh"
+                    class="w-11 h-11 rounded-full bg-[#121826] border border-white/[0.1] flex items-center justify-center text-gray-200 hover:bg-[#1e2638] active:scale-95 transition cursor-pointer">
+                    <i id="refresh-icon" data-lucide="rotate-cw" class="w-[18px] h-[18px] transition-transform duration-500 pointer-events-none"></i>
+                </button>
+            </header>
+
+            <!-- Hero Banner: Gear 5 Glowing Silhouette & Full Moon -->
+            <div class="relative w-full h-[215px] overflow-hidden select-none bg-[#090d16]">
+                <!-- Dark Stormy Background -->
+                <img 
+                    src="https://images.unsplash.com/photo-1532693322450-2cb5c511067d?auto=format&fit=crop&w=900&q=85" 
+                    onerror="this.onerror=null; this.src='https://placehold.co/900x450/0c1322/ffffff?text=VOLTEX+BANNER';"
+                    alt="Voltex Gear 5 Moon Banner" 
+                    class="w-full h-full object-cover object-center grayscale brightness-50 contrast-125"
+                />
+                <div class="absolute inset-0 bg-gradient-to-t from-[#070b14] via-black/30 to-black/50"></div>
+
+                <!-- Custom SVG Full Moon, Swirling Hagoromo Clouds & Glowing Gear 5 Silhouette -->
+                <svg class="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 430 215" preserveAspectRatio="xMidYMid slice">
+                    <defs>
+                        <radialGradient id="fullMoonGlow" cx="68%" cy="40%" r="44%">
+                            <stop offset="0%" stop-color="#ffffff" stop-opacity="0.98"/>
+                            <stop offset="42%" stop-color="#e2e8f0" stop-opacity="0.72"/>
+                            <stop offset="72%" stop-color="#64748b" stop-opacity="0.2"/>
+                            <stop offset="100%" stop-color="#070b14" stop-opacity="0"/>
+                        </radialGradient>
+                        <filter id="whiteAura" x="-20%" y="-20%" width="140%" height="140%">
+                            <feGaussianBlur stdDeviation="3.5" result="blur"/>
+                            <feMerge>
+                                <feMergeNode in="blur"/>
+                                <feMergeNode in="SourceGraphic"/>
+                            </feMerge>
+                        </filter>
+                    </defs>
+
+                    <!-- Bright Full Moon -->
+                    <circle cx="292" cy="84" r="88" fill="url(#fullMoonGlow)"/>
+
+                    <!-- Swirling White Hagoromo Steam Clouds -->
+                    <g filter="url(#whiteAura)" opacity="0.85">
+                        <path d="M135,125 Q102,88 145,66 Q172,32 218,48 Q265,28 292,68 Q328,90 296,128" fill="none" stroke="#ffffff" stroke-width="5" stroke-linecap="round"/>
+                        <path d="M162,108 C185,78 242,78 268,108" fill="none" stroke="#e2e8f0" stroke-width="3.5" stroke-linecap="round"/>
+                        <!-- Dynamic Hero Silhouette Pose in Front of Moon -->
+                        <circle cx="222" cy="64" r="13" fill="#ffffff"/>
+                        <path d="M206,56 Q222,40 238,56 Q230,50 222,52 Q214,50 206,56 Z" fill="#ffffff"/>
+                        <path d="M204,80 L238,80 L248,118 L228,122 L222,102 L212,124 L194,118 Z" fill="#ffffff"/>
+                        <path d="M204,82 L175,66 L181,58 L208,74 Z" fill="#ffffff"/>
+                        <path d="M238,82 L268,70 L272,78 L242,90 Z" fill="#ffffff"/>
+                    </g>
+
+                    <!-- Bottom Dark Fog Transition -->
+                    <path d="M0,170 Q95,142 195,170 T370,164 T430,174 L430,215 L0,215 Z" fill="rgba(7,11,20,0.85)"/>
+                </svg>
+
+                <!-- Large Glowing Text: VOLTEX at Bottom of Banner -->
+                <div class="absolute inset-x-0 bottom-3 flex justify-center items-center pointer-events-none">
+                    <h2 class="font-display font-extrabold text-[34px] tracking-[0.28em] text-white banner-text-glow pl-[0.28em]">
+                        VOLTEX
+                    </h2>
+                </div>
+            </div>
+
+            <!-- Main Dashboard Cards -->
+            <main class="px-4 pt-3 flex flex-col gap-4">
+
+                <!-- KARTU 1: NOMOR TARGET (Blue #1565c0, rounded-2xl) -->
+                <div class="bg-[#1565c0] rounded-2xl p-4 shadow-lg">
+                    <div class="flex items-center gap-3.5 mb-3.5">
+                        <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                            <i data-lucide="smartphone" class="w-5 h-5 text-white"></i>
+                        </div>
+                        <h3 class="font-display font-bold text-[14px] tracking-[0.14em] text-white uppercase">
+                            NOMOR TARGET
+                        </h3>
+                    </div>
+
+                    <div class="relative flex items-center bg-[#0c1322] rounded-xl px-4 py-3.5 border border-white/[0.08] focus-within:border-white/45 transition">
+                        <i data-lucide="globe" class="w-5 h-5 text-slate-400 mr-3.5 shrink-0"></i>
+                        <input 
+                            id="target-number"
+                            type="tel" 
+                            inputmode="numeric"
+                            placeholder="62xxxxxxxxxxx" 
+                            maxlength="16"
+                            class="w-full bg-transparent text-white placeholder-slate-500 font-mono-tech text-[14px] tracking-[0.12em] focus:outline-none"
+                        />
+                        <button id="btn-clear-number" type="button" class="hidden text-slate-400 hover:text-white ml-2 cursor-pointer">
+                            <i data-lucide="x-circle" class="w-4 h-4"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- KARTU 2: PILIH BUG (Blue #1565c0, rounded-2xl) -->
+                <div class="bg-[#1565c0] rounded-2xl p-4 shadow-lg">
+                    <div class="flex items-center justify-between gap-2 mb-4">
+                        <div class="flex items-center gap-3">
+                            <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center shrink-0">
+                                <i data-lucide="bug" class="w-5 h-5 text-white"></i>
+                            </div>
+                            <h3 class="font-display font-bold text-[14px] tracking-[0.12em] text-white uppercase">
+                                PILIH BUG
+                            </h3>
+                        </div>
+
+                        <!-- Dark Badge: ● Sender : online -->
+                        <div class="bg-[#0c1322] border border-white/10 rounded-full px-3 py-1.5 flex items-center gap-2 shrink-0">
+                            <span class="w-2 h-2 rounded-full bg-[#00c853] animate-dot"></span>
+                            <span class="font-mono-tech text-[11px] text-slate-200 tracking-wide">
+                                Sender : online
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Horizontal Carousel Slider (5 Bug Cards) -->
+                    <div id="bug-carousel" class="carousel-track flex gap-3 overflow-x-auto no-scrollbar pb-1">
+                        <!-- Cards populated via JavaScript -->
+                    </div>
+
+                    <!-- Active Dot Indicators -->
+                    <div id="pagination-dots" class="flex items-center justify-center gap-2 mt-3.5">
+                        <!-- Dots populated via JavaScript -->
+                    </div>
+                </div>
+
+                <!-- KARTU 3: PILIH SENDER (White #ffffff, rounded-2xl) -->
+                <div class="bg-[#ffffff] rounded-2xl p-4 shadow-xl text-slate-900">
+                    <div class="flex items-center justify-between gap-2 mb-3.5">
+                        <div class="flex items-center gap-2.5">
+                            <div class="w-10 h-10 rounded-full bg-[#1565c0]/12 flex items-center justify-center shrink-0 text-[#1565c0]">
+                                <i data-lucide="arrow-left-right" class="w-5 h-5"></i>
+                            </div>
+                            <div class="flex items-center gap-1.5">
+                                <h3 class="font-display font-bold text-[13px] tracking-[0.08em] text-[#0f172a] uppercase">
+                                    PILIH SENDER
+                                </h3>
+                                <button id="btn-refresh-sender" type="button" aria-label="Refresh Sender"
+                                    class="p-1 text-[#1565c0] hover:bg-blue-50 rounded-full active:rotate-180 transition-transform duration-300 cursor-pointer">
+                                    <i data-lucide="rotate-cw" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Light Green Badge: ● 9 sender online -->
+                        <div class="bg-[#e6f9ed] border border-[#00c853]/30 rounded-full px-2.5 py-1 flex items-center gap-1.5 shrink-0">
+                            <span class="w-2 h-2 rounded-full bg-[#00c853] animate-dot"></span>
+                            <span id="sender-online-count" class="font-mono-tech text-[11px] font-semibold text-[#009e40]">
+                                9 sender online
+                            </span>
+                        </div>
+                    </div>
+
+                    <!-- Active Sender Selector Dropdown -->
+                    <div class="relative mb-3.5">
+                        <select id="sender-select" 
+                            class="w-full appearance-none bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl px-4 py-3.5 pr-10 font-mono-tech text-[12.5px] font-semibold text-slate-800 focus:outline-none focus:border-[#1565c0] transition cursor-pointer">
+                            <option value="Sender 01 - VIP Server [Online]">Sender 01 - VIP Server [Online]</option>
+                            <option value="Sender 02 - Fast Node SG [Online]">Sender 02 - Fast Node SG [Online]</option>
+                            <option value="Sender 03 - Private ID [Online]">Sender 03 - Private ID [Online]</option>
+                            <option value="Sender 04 - Bypass Pro [Online]">Sender 04 - Bypass Pro [Online]</option>
+                            <option value="Sender 05 - Turbo US [Online]">Sender 05 - Turbo US [Online]</option>
+                            <option value="Sender 06 - Alpha X [Online]">Sender 06 - Alpha X [Online]</option>
+                            <option value="Sender 07 - Omega V2 [Online]">Sender 07 - Omega V2 [Online]</option>
+                            <option value="Sender 08 - Phantom [Online]">Sender 08 - Phantom [Online]</option>
+                            <option value="Sender 09 - Voltex Core [Online]">Sender 09 - Voltex Core [Online]</option>
+                        </select>
+                        <div class="pointer-events-none absolute inset-y-0 right-3.5 flex items-center text-slate-500">
+                            <i data-lucide="chevron-down" class="w-4 h-4"></i>
+                        </div>
+                    </div>
+
+                    <!-- Simulated Execution Progress Bar -->
+                    <div id="exec-progress-wrap" class="hidden mb-3.5">
+                        <div class="flex justify-between font-mono-tech text-[10.5px] text-slate-600 mb-1">
+                            <span id="exec-status-label">Menghubungkan ke server...</span>
+                            <span id="exec-percent">0%</span>
+                        </div>
+                        <div class="w-full h-2 bg-slate-200 rounded-full overflow-hidden">
+                            <div id="exec-progress-bar" class="h-full bg-gradient-to-r from-[#1565c0] to-[#00c853] w-0 transition-all duration-200"></div>
+                        </div>
+                    </div>
+
+                    <!-- Execute Button: KIRIM BUG SEKARANG -->
+                    <button id="btn-send-bug" type="button"
+                        class="w-full bg-[#1565c0] hover:bg-[#10529e] active:scale-[0.98] text-white font-display font-bold text-[12.5px] tracking-[0.14em] uppercase py-4 rounded-xl shadow-md shadow-blue-600/30 flex items-center justify-center gap-2.5 transition-all cursor-pointer">
+                        <i id="send-icon" data-lucide="send" class="w-4 h-4"></i>
+                        <span id="send-text">KIRIM BUG SEKARANG</span>
+                    </button>
+
+                    <p class="text-center font-mono-tech text-[10px] text-slate-400 mt-2.5">
+                        UI/UX Simulation Mode • No Real Network Traffic
+                    </p>
+                </div>
+
+            </main>
+        </section>
+    </div>
+
+    <!-- Simulation Success / Info Modal -->
+    <div id="sim-modal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/75 backdrop-blur-xs px-4">
+        <div class="w-full max-w-[375px] bg-[#0f172a] border border-white/15 rounded-2xl p-5 text-white shadow-2xl">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 rounded-full bg-[#00c853]/20 text-[#00c853] flex items-center justify-center shrink-0">
+                    <i data-lucide="check-circle-2" class="w-6 h-6"></i>
+                </div>
+                <div>
+                    <h4 class="font-display font-bold text-[14px] tracking-wider uppercase text-white">SIMULASI SELESAI</h4>
+                    <p class="font-mono-tech text-[11px] text-emerald-400">Status: Payload Sent (Dummy)</p>
+                </div>
+            </div>
+            <div id="sim-modal-details" class="bg-[#070b14] border border-white/10 rounded-xl p-3.5 font-mono-tech text-[11.5px] text-slate-300 space-y-1.5 mb-4">
+                <!-- Details populated via JS -->
+            </div>
+            <button id="btn-close-sim-modal" type="button"
+                class="w-full py-3 rounded-xl bg-[#1565c0] hover:bg-[#1976d2] font-display font-bold text-[12px] tracking-widest uppercase text-white transition cursor-pointer">
+                TUTUP
+            </button>
+        </div>
+    </div>
+
+    <!-- Custom Toast Notification Container -->
+    <div id="toast-container" class="fixed bottom-5 left-1/2 -translate-x-1/2 z-50 w-[90%] max-w-[395px] pointer-events-none flex flex-col gap-2"></div>
+
+    <script>
+        // Global Screen Switcher Functions (Available immediately for inline onclick & event listeners)
+        function enterDashboard() {
+            const landing = document.getElementById('landing-screen');
+            const dashboard = document.getElementById('dashboard-screen');
+            if (landing && dashboard) {
+                landing.classList.add('hidden-screen');
+                landing.style.display = 'none';
+                dashboard.classList.remove('hidden-screen');
+                dashboard.style.display = 'flex';
+                window.scrollTo(0, 0);
+                if (typeof showToast === 'function') {
+                    showToast('Akses Masuk', 'Berhasil masuk ke panel VOLTEX BUG.', 'success');
+                }
+            }
+        }
+
+        function returnToLanding() {
+            const landing = document.getElementById('landing-screen');
+            const dashboard = document.getElementById('dashboard-screen');
+            if (landing && dashboard) {
+                dashboard.classList.add('hidden-screen');
+                dashboard.style.display = 'none';
+                landing.classList.remove('hidden-screen');
+                landing.style.display = 'flex';
+                window.scrollTo(0, 0);
+            }
+        }
+
+        // Toast Helper Function
+        function showToast(title, message, type = 'info') {
+            const container = document.getElementById('toast-container');
+            if (!container) return;
+
+            const toast = document.createElement('div');
+            const borderClass = type === 'success'
+                ? 'border-[#00c853]/70'
+                : type === 'error'
+                    ? 'border-rose-500/70'
+                    : type === 'warning'
+                        ? 'border-[#EAB308]/70'
+                        : 'border-[#38BDF8]/70';
+
+            const iconName = type === 'success'
+                ? 'check-circle-2'
+                : type === 'error'
+                    ? 'alert-circle'
+                    : type === 'warning'
+                        ? 'crown'
+                        : 'info';
+
+            const iconColor = type === 'success'
+                ? 'text-[#00c853]'
+                : type === 'error'
+                    ? 'text-rose-400'
+                    : type === 'warning'
+                        ? 'text-[#FACC15]'
+                        : 'text-[#38BDF8]';
+
+            toast.className = `toast-enter bg-[#0c1322]/95 backdrop-blur-md border ${borderClass} text-white px-4 py-3 rounded-2xl shadow-2xl flex items-start gap-3`;
+            toast.innerHTML = `
+                <i data-lucide="${iconName}" class="w-5 h-5 ${iconColor} shrink-0 mt-0.5"></i>
+                <div class="flex-1 min-w-0">
+                    <div class="font-display font-bold text-[12px] tracking-wider uppercase">${title}</div>
+                    <div class="font-mono-tech text-[11px] text-slate-300 mt-0.5 break-words">${message}</div>
+                </div>
+            `;
+
+            container.innerHTML = '';
+            container.appendChild(toast);
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                toast.style.transform = 'translate(-50%, 10px)';
+                toast.style.transition = 'all 0.25s ease';
+                setTimeout(() => toast.remove(), 250);
+            }, 3400);
+        }
+
+        // Clean Initialization After DOM Loaded
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.lucide) {
+                lucide.createIcons();
+            }
+
+            // Explicit DOM Event Listeners for Screen Navigation
+            const btnMasuk = document.getElementById('btn-masuk');
+            const btnBack = document.getElementById('btn-back');
+
+            if (btnMasuk) {
+                btnMasuk.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    enterDashboard();
+                });
+            }
+
+            if (btnBack) {
+                btnBack.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    returnToLanding();
+                });
+            }
+
+            // Landing Screen Secondary Buttons
+            const btnBeliAkses = document.getElementById('btn-beli-akses');
+            if (btnBeliAkses) {
+                btnBeliAkses.addEventListener('click', () => {
+                    showToast(
+                        'Paket Akses VIP (Dummy)',
+                        'VIP 30 Hari: Rp 25K | Reseller Permanent: Rp 60K. Hubungi admin untuk aktivasi.',
+                        'warning'
+                    );
+                });
+            }
+
+            const btnHubungiSupport = document.getElementById('btn-hubungi-support');
+            if (btnHubungiSupport) {
+                btnHubungiSupport.addEventListener('click', () => {
+                    showToast(
+                        'Voltex Support 24/7',
+                        'Telegram CS: @VoltexSupportID • Status Server: Online (99.9%).',
+                        'info'
+                    );
+                });
+            }
+
+            document.querySelectorAll('.social-btn').forEach((btn) => {
+                btn.addEventListener('click', () => {
+                    const label = btn.getAttribute('data-social') || 'Sosial Media';
+                    showToast('Tautan Sosial', `Membuka ${label} (Simulasi UI).`, 'info');
+                });
+            });
+
+            // 5 Bug Options Data (Exact specification)
+            const bugOptions = [
+                { id: 1, name: "DELAY FORCE", icon: "shield", badge: "1" },
+                { id: 2, name: "CRASH UI", icon: "zap", badge: "2" },
+                { id: 3, name: "BLANK WA", icon: "eye-off", badge: "3" },
+                { id: 4, name: "VIRTEX SPAM", icon: "flame", badge: "4" },
+                { id: 5, name: "FORCE CLOSE", icon: "skull", badge: "5" }
+            ];
+
+            let selectedBugIndex = 0;
+
+            const carouselEl = document.getElementById('bug-carousel');
+            const dotsEl = document.getElementById('pagination-dots');
+            const targetInput = document.getElementById('target-number');
+            const clearBtn = document.getElementById('btn-clear-number');
+
+            function renderCarousel() {
+                if (!carouselEl || !dotsEl) return;
+                carouselEl.innerHTML = '';
+                dotsEl.innerHTML = '';
+
+                bugOptions.forEach((bug, index) => {
+                    const isSelected = index === selectedBugIndex;
+
+                    const card = document.createElement('div');
+                    card.className = `carousel-slide shrink-0 w-[85%] rounded-2xl p-4 transition-all duration-200 cursor-pointer select-none flex flex-col justify-between min-h-[152px] ${
+                        isSelected
+                            ? 'bg-[#2b74cc] border-2 border-white shadow-lg'
+                            : 'bg-[#104c91]/85 border-2 border-transparent opacity-75 hover:opacity-95'
+                    }`;
+
+                    card.innerHTML = `
+                        <div class="flex items-start justify-between">
+                            <div class="w-11 h-11 rounded-full bg-white/20 flex items-center justify-center">
+                                <i data-lucide="${bug.icon}" class="w-5 h-5 text-white"></i>
+                            </div>
+
+                            <div class="w-8 h-8 rounded-full flex items-center justify-center transition-all duration-200 ${
+                                isSelected ? 'bg-[#00c853] scale-100 opacity-100 shadow-md' : 'bg-white/10 scale-75 opacity-0'
+                            }">
+                                <i data-lucide="check" class="w-4 h-4 text-white stroke-[3]"></i>
+                            </div>
+                        </div>
+
+                        <div class="mt-5">
+                            <div class="font-display font-bold text-[15px] tracking-[0.08em] text-white uppercase mb-2">
+                                ${bug.name}
+                            </div>
+                            <span class="inline-flex items-center justify-center bg-[#0c1322]/75 text-slate-200 font-mono-tech text-[11px] font-semibold px-2.5 py-1 rounded-md border border-white/15">
+                                ${bug.badge}
+                            </span>
+                        </div>
+                    `;
+
+                    card.addEventListener('click', () => selectBug(index));
+                    carouselEl.appendChild(card);
+
+                    const dot = document.createElement('button');
+                    dot.type = 'button';
+                    dot.setAttribute('aria-label', `Pilih ${bug.name}`);
+                    dot.className = `h-1.5 rounded-full transition-all duration-300 cursor-pointer ${
+                        isSelected ? 'w-6 bg-white' : 'w-1.5 bg-white/35 hover:bg-white/60'
+                    }`;
+                    dot.addEventListener('click', () => selectBug(index));
+                    dotsEl.appendChild(dot);
+                });
+
+                if (window.lucide) {
+                    lucide.createIcons();
+                }
+            }
+
+            function selectBug(index) {
+                selectedBugIndex = index;
+                renderCarousel();
+
+                const slides = carouselEl.querySelectorAll('.carousel-slide');
+                if (slides[index]) {
+                    const offsetLeft = slides[index].offsetLeft - carouselEl.offsetLeft;
+                    carouselEl.scrollTo({
+                        left: offsetLeft,
+                        behavior: 'smooth'
+                    });
+                }
+            }
+
+            // Detect manual horizontal swipe on carousel
+            let scrollTimeout;
+            if (carouselEl) {
+                carouselEl.addEventListener('scroll', () => {
+                    clearTimeout(scrollTimeout);
+                    scrollTimeout = setTimeout(() => {
+                        const slides = carouselEl.querySelectorAll('.carousel-slide');
+                        let closestIndex = 0;
+                        let minDistance = Infinity;
+
+                        slides.forEach((slide, idx) => {
+                            const slideLeft = slide.offsetLeft - carouselEl.offsetLeft;
+                            const distance = Math.abs(carouselEl.scrollLeft - slideLeft);
+                            if (distance < minDistance) {
+                                minDistance = distance;
+                                closestIndex = idx;
+                            }
+                        });
+
+                        if (closestIndex !== selectedBugIndex) {
+                            selectedBugIndex = closestIndex;
+                            renderCarousel();
+                        }
+                    }, 90);
+                });
+            }
+
+            // Target Phone Input Numeric Filter
+            if (targetInput && clearBtn) {
+                targetInput.addEventListener('input', (e) => {
+                    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                    clearBtn.classList.toggle('hidden', e.target.value.length === 0);
+                });
+
+                clearBtn.addEventListener('click', () => {
+                    targetInput.value = '';
+                    clearBtn.classList.add('hidden');
+                    targetInput.focus();
+                });
+            }
+
+            // Top Right Header Refresh Button (Resets selection with spin & toast)
+            const btnRefresh = document.getElementById('btn-refresh');
+            if (btnRefresh) {
+                btnRefresh.addEventListener('click', () => {
+                    const icon = document.getElementById('refresh-icon');
+                    if (icon) {
+                        icon.style.transform = 'rotate(360deg)';
+                        setTimeout(() => { icon.style.transform = 'rotate(0deg)'; }, 500);
+                    }
+                    if (targetInput) targetInput.value = '';
+                    if (clearBtn) clearBtn.classList.add('hidden');
+                    selectBug(0);
+                    const senderSelect = document.getElementById('sender-select');
+                    if (senderSelect) senderSelect.selectedIndex = 0;
+                    showToast('Reset Berhasil', 'Pilihan bug, nomor target, dan sender telah direset.', 'info');
+                });
+            }
+
+            // Sender Refresh Button
+            const btnRefreshSender = document.getElementById('btn-refresh-sender');
+            if (btnRefreshSender) {
+                btnRefreshSender.addEventListener('click', () => {
+                    const countEl = document.getElementById('sender-online-count');
+                    const randomCount = Math.floor(Math.random() * 3) + 8; // 8-10
+                    if (countEl) countEl.textContent = `${randomCount} sender online`;
+                    showToast('Sender Disegarkan', `${randomCount} server sender aktif siap digunakan.`, 'info');
+                });
+            }
+
+            // Modal Close Handlers
+            const simModal = document.getElementById('sim-modal');
+            const btnCloseSimModal = document.getElementById('btn-close-sim-modal');
+            if (btnCloseSimModal && simModal) {
+                btnCloseSimModal.addEventListener('click', () => {
+                    simModal.classList.add('hidden');
+                    simModal.classList.remove('flex');
+                });
+                simModal.addEventListener('click', (e) => {
+                    if (e.target === simModal) {
+                        simModal.classList.add('hidden');
+                        simModal.classList.remove('flex');
+                    }
+                });
+            }
+
+            // Execute Button: KIRIM BUG SEKARANG (Dummy Simulation)
+            const sendBtn = document.getElementById('btn-send-bug');
+            const sendText = document.getElementById('send-text');
+            const sendIcon = document.getElementById('send-icon');
+            const progressWrap = document.getElementById('exec-progress-wrap');
+            const progressBar = document.getElementById('exec-progress-bar');
+            const progressPercent = document.getElementById('exec-percent');
+            const statusLabel = document.getElementById('exec-status-label');
+
+            if (sendBtn) {
+                sendBtn.addEventListener('click', () => {
+                    const target = targetInput ? targetInput.value.trim() : '';
+                    const selectedBug = bugOptions[selectedBugIndex];
+                    const senderSelect = document.getElementById('sender-select');
+                    const selectedSender = senderSelect ? senderSelect.value : 'Sender 01 - VIP Server [Online]';
+
+                    if (!target || target.length < 8) {
+                        if (targetInput) targetInput.focus();
+                        showToast('Nomor Target Kosong', 'Masukkan nomor target valid (contoh: 628123456789).', 'error');
+                        return;
+                    }
+
+                    sendBtn.disabled = true;
+                    sendBtn.classList.add('opacity-80', 'cursor-not-allowed');
+                    sendText.textContent = 'MEMPROSES...';
+                    sendIcon.setAttribute('data-lucide', 'loader-2');
+                    sendIcon.classList.add('animate-spin');
+                    if (window.lucide) lucide.createIcons();
+
+                    progressWrap.classList.remove('hidden');
+                    progressBar.style.width = '20%';
+                    progressPercent.textContent = '20%';
+                    statusLabel.textContent = 'Menghubungkan ke sender...';
+
+                    setTimeout(() => {
+                        progressBar.style.width = '65%';
+                        progressPercent.textContent = '65%';
+                        statusLabel.textContent = `Mengirim ${selectedBug.name}...`;
+                    }, 500);
+
+                    setTimeout(() => {
+                        progressBar.style.width = '100%';
+                        progressPercent.textContent = '100%';
+                        statusLabel.textContent = 'Simulasi selesai!';
+                    }, 1050);
+
+                    setTimeout(() => {
+                        sendBtn.disabled = false;
+                        sendBtn.classList.remove('opacity-80', 'cursor-not-allowed');
+                        sendText.textContent = 'KIRIM BUG SEKARANG';
+                        sendIcon.setAttribute('data-lucide', 'send');
+                        sendIcon.classList.remove('animate-spin');
+                        if (window.lucide) lucide.createIcons();
+
+                        setTimeout(() => {
+                            progressWrap.classList.add('hidden');
+                            progressBar.style.width = '0%';
+                        }, 600);
+
+                        // Show Modal Summary + Toast
+                        const modalDetails = document.getElementById('sim-modal-details');
+                        if (modalDetails && simModal) {
+                            modalDetails.innerHTML = `
+                                <div><span class="text-slate-500">Target :</span> <span class="text-white font-semibold">+${target}</span></div>
+                                <div><span class="text-slate-500">Jenis Bug :</span> <span class="text-[#38BDF8] font-semibold">${selectedBug.name} (#${selectedBug.badge})</span></div>
+                                <div><span class="text-slate-500">Sender :</span> <span class="text-emerald-400">${selectedSender}</span></div>
+                                <div class="text-[10px] text-slate-400 pt-1 border-t border-white/10">*Hanya simulasi UI dummy (tanpa trafik jaringan).</div>
+                            `;
+                            simModal.classList.remove('hidden');
+                            simModal.classList.add('flex');
+                        }
+
+                        showToast(
+                            'Simulasi Berhasil',
+                            `${selectedBug.name} berhasil disimulasikan ke +${target}.`,
+                            'success'
+                        );
+                    }, 1450);
+                });
+            }
+
+            // Render initial carousel state
+            renderCarousel();
+        });
+    </script>
+</body>
+</html>
